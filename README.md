@@ -1,64 +1,77 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- WICHTIG für Handy! -->
-  <title>TomTom Routenplaner mit Standort</title>
-  
-  <!-- TomTom API und Styles -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TomTom Routenplaner</title>
+
   <script src="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.20.0/maps/maps-web.min.js"></script>
   <script src="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.20.0/services/services-web.min.js"></script>
   <link href="https://api.tomtom.com/maps-sdk-for-web/cdn/6.x/6.20.0/maps/maps.css" rel="stylesheet" />
-
-  <!-- Materialize CSS und Icons -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   <style>
     body {
       margin: 0;
-      background-color: #607d8b;
-      font-family: Arial, sans-serif;
+      background-color: #eceff1;
+      font-family: 'Roboto', sans-serif;
     }
     #map {
       width: 100%;
-      height: 50vh; /* statt 500px - passt sich Bildschirmhöhe an */
+      height: 60vh;
     }
-    #form {
-      padding: 15px;
-      background-color: #ffffff;
+    .card-panel {
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 12px;
     }
-    input[type="text"] {
-      background-color: white !important;
-      color: black;
+    .btn-large {
+      width: 100%;
+      margin-top: 15px;
     }
     .info {
+      margin: 20px auto;
       padding: 15px;
       background-color: #607d8b;
       color: white;
+      text-align: center;
       font-weight: bold;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
     }
-    /* Zusatz: Button zentrieren auf kleinen Bildschirmen */
-    .btn-floating {
-      display: block;
-      margin: 20px auto;
+    .center-content {
+      text-align: center;
+    }
+    label {
+      color: #607d8b !important;
     }
   </style>
 </head>
 
 <body>
-  <div id="form" class="container">
-    <strong>Von: Aktueller Standort</strong><br>
-    <div class="input-field">
-      <input type="text" id="to" placeholder="Zielort eingeben" />
+
+  <div class="container">
+    <div class="card-panel white z-depth-3">
+      <h5 class="center-align">Routenplaner (Start: Dein Standort)</h5>
+
+      <div class="input-field">
+        <input type="text" id="to" placeholder="Zielort eingeben" />
+        <label for="to">Zielort</label>
+      </div>
+
+      <div class="center-content">
+        <a class="btn-large blue pulse" onclick="useMyLocation()" title="Route berechnen">
+          <i class="material-icons left">navigation</i> Route berechnen
+        </a>
+      </div>
     </div>
-    <a class="btn-floating btn-large pulse blue" onclick="useMyLocation()" title="Route berechnen">
-      <i class="material-icons">navigation</i>
-    </a>
   </div>
 
   <div id="map"></div>
-  <div class="info" id="routeInfo"></div>
+
+  <div class="info" id="routeInfo">Bitte Ziel eingeben und Route berechnen.</div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 
@@ -95,7 +108,7 @@
         map.flyTo({ center: [from.lon, from.lat], zoom: 12 });
         const toText = document.getElementById('to').value;
         if (!toText) {
-          alert("Bitte ein Ziel eingeben.");
+          M.toast({html: 'Bitte ein Ziel eingeben!'});
           return;
         }
 
@@ -146,8 +159,9 @@
       const lengthInKm = (summary.lengthInMeters / 1000).toFixed(2);
       const travelTimeInMin = Math.round(summary.travelTimeInSeconds / 60);
 
-      document.getElementById('routeInfo').innerText = `Entfernung: ${lengthInKm} km  Fahrzeit: ${travelTimeInMin} Minuten`;
+      document.getElementById('routeInfo').innerText = `Entfernung: ${lengthInKm} km • Fahrzeit: ${travelTimeInMin} Minuten`;
     }
   </script>
+
 </body>
 </html>
