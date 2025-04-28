@@ -21,31 +21,25 @@
       width: 100%;
       height: 60vh;
     }
+    .container {
+      padding-top: 20px;
+    }
     .card-panel {
       padding: 20px;
-      margin-top: 20px;
-      border-radius: 12px;
+      border-radius: 10px;
     }
     .btn-large {
       width: 100%;
       margin-top: 15px;
     }
     .info {
-      margin: 20px auto;
+      margin-top: 20px;
       padding: 15px;
       background-color: #607d8b;
       color: white;
       text-align: center;
       font-weight: bold;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 600px;
-    }
-    .center-content {
-      text-align: center;
-    }
-    label {
-      color: #607d8b !important;
+      border-radius: 8px;
     }
   </style>
 </head>
@@ -54,33 +48,31 @@
 
   <div class="container">
     <div class="card-panel white z-depth-3">
-      <h5 class="center-align">Routenplaner (Start: Dein Standort)</h5>
+      <h5 class="center-align">Routenplaner</h5>
 
       <div class="input-field">
-        <input type="text" id="to" placeholder="Zielort eingeben" />
-        <label for="to">Zielort</label>
+        <input type="text" id="to" placeholder="Zielort eingeben">
+        <label for="to">Ziel</label>
       </div>
 
-      <div class="center-content">
-        <a class="btn-large blue pulse" onclick="useMyLocation()" title="Route berechnen">
-          <i class="material-icons left">navigation</i> Route berechnen
-        </a>
-      </div>
+      <button class="btn-large blue" onclick="calculateRouteFromCurrentLocation()">
+        <i class="material-icons left">navigation</i> Route von meinem Standort
+      </button>
     </div>
   </div>
 
   <div id="map"></div>
-
-  <div class="info" id="routeInfo">Bitte Ziel eingeben und Route berechnen.</div>
+  <div class="info" id="routeInfo">Bitte Ziel eingeben und Route berechnen!</div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 
   <script>
     const apiKey = 'MyFx4h2uQZPsRAW3Y2HOYn2yQgwfecza';
+
     const map = tt.map({
       key: apiKey,
       container: 'map',
-      center: [13.4050, 52.5200],
+      center: [13.4050, 52.5200], // Start in Berlin
       zoom: 10
     });
 
@@ -90,10 +82,17 @@
       const url = `https://api.tomtom.com/search/2/geocode/${encodeURIComponent(query)}.json?key=${apiKey}`;
       const res = await fetch(url);
       const data = await res.json();
-      return data.results[0].position;
+      return data.results[0]?.position;
     }
 
-    function useMyLocation() {
+    async function calculateRouteFromCurrentLocation() {
+      const toText = document.getElementById('to').value;
+
+      if (!toText) {
+        M.toast({html: 'Bitte ein Ziel eingeben!'});
+        return;
+      }
+
       if (!navigator.geolocation) {
         alert("Geolocation wird von deinem Browser nicht unterstützt.");
         return;
@@ -105,17 +104,17 @@
           lon: position.coords.longitude
         };
 
-        map.flyTo({ center: [from.lon, from.lat], zoom: 12 });
-        const toText = document.getElementById('to').value;
-        if (!toText) {
-          M.toast({html: 'Bitte ein Ziel eingeben!'});
+        const to = await geocode(toText);
+
+        if (!to) {
+          M.toast({html: 'Ziel konnte nicht gefunden werden.'});
           return;
         }
 
-        const to = await geocode(toText);
+        map.flyTo({ center: [from.lon, from.lat], zoom: 12 });
         calculateRoute(from, to);
-      }, (error) => {
-        console.error("Fehler beim Abrufen des Standorts:", error);
+      }, error => {
+        console.error(error);
         alert("Standort konnte nicht ermittelt werden.");
       }, {
         enableHighAccuracy: true,
